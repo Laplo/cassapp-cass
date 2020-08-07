@@ -14,6 +14,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-scripts": "3.4.1",
+    "react-scroll-trigger": "0.6.6",
     "react-web-notifications": "1.1.0",
     "subscriptions-transport-ws": "0.9.17",
     "tailwind": "4.0.0",
@@ -22,6 +23,7 @@
   "scripts": {
     "start": "npm run watch:css && react-scripts start",
     "build": "npm run build:css && react-scripts build",
+    "build:serve": "npm run build:css && react-scripts build && serve -s build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:css": "postcss src/assets/tailwind.css -o src/assets/main.css",

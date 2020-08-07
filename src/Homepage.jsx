@@ -5,10 +5,11 @@ import {
     useSubscription,
     useMutation,
 } from '@apollo/client';
+import ScrollTrigger from 'react-scroll-trigger';
 
 const SUBSCRIBE_ORDERS = gql`
-  subscription MySubscription {
-    orders(limit: 10, order_by: {order_created_at: desc}) {
+  subscription MySubscription($limit: Int!) {
+    orders(limit: $limit, order_by: {order_created_at: desc}) {
       order_id
       comment
       order_created_at
@@ -60,8 +61,10 @@ const UPDATE_NEW_ORDERS = gql`
 
 
 export default function Homepage() {
+    const [inViewport, setInViewport] = useState(false);
+    const [limit, setLimit] = useState(20);
     const {data: dataNewOrders} = useSubscription(SUBSCRIBE_NEW_ORDERS);
-    const {data: dataOrders} = useSubscription(SUBSCRIBE_ORDERS);
+    const {data: dataOrders} = useSubscription(SUBSCRIBE_ORDERS, {variables: {limit}});
     const [updateOrder] = useMutation(UPDATE_NEW_ORDERS);
     const [audio] = useState(new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'));
 
@@ -74,6 +77,12 @@ export default function Homepage() {
             ));
         }
     }, []);
+
+    useEffect(() => {
+        if (inViewport) {
+            setLimit(l => l + 20);
+        }
+    }, [inViewport]);
 
     useEffect(() => {
         if (!dataNewOrders || !dataNewOrders.orders.length) return;
@@ -95,8 +104,19 @@ export default function Homepage() {
         });
     }, [dataNewOrders, updateOrder, audio]);
 
+    const transformDate = date => {
+        const addZBefore = date => date < 10 ? '0' + date : date;
+        const nDate = new Date(date);
+        const day = addZBefore(nDate.getDate());
+        const month = addZBefore(nDate.getMonth() + 1);
+        const year = nDate.getFullYear();
+        const hour = addZBefore(nDate.getHours());
+        const minute = addZBefore(nDate.getMinutes());
 
-    return dataOrders ?
+        return 'Le ' + day + '/' + month + '/' + year + ' à ' + hour + ':' + minute;
+    };
+
+    const displayOrders = dataOrders ?
         dataOrders.orders.map(({
            alcohol,
            comment,
@@ -109,25 +129,26 @@ export default function Homepage() {
            },
         }) => (
             <div style={{
-                borderTop: "3px solid green",
-                marginLeft: "auto",
-                marginRight: "auto",
-                left: "50%",
+                borderTop: "3px solid #48bb78",
+                minWidth: "20%"
             }}
             key={order_id}
             className="
-                max-w-sm
-                rounded
+                rounded-t-lg
+                rounded-b-sm
                 overflow-hidden
                 shadow-2xl
-                mt-10
+                m-5
+                bg-gray-700
+                hover:bg-gray-600
             ">
-                <div
-                    style={{marginLeft: '10%', marginRight: '10%'}}
-                >
+                <div className="mr-5 ml-5">
                     <div className="px-6 py-4">
-                        <div className="font-bold text-xl mb-2">
-                            {user_name}
+                        <div className="mb-0">
+                            <div className="font-bold text-xl text-gray-300">
+                                {user_name}
+                            </div>
+                            <span className="text-gray-500">{transformDate(order_created_at)}</span>
                         </div>
                         <div className="py-4">
                             <span
@@ -177,9 +198,21 @@ export default function Homepage() {
                                 </span>
                             : null}
                         </div>
+                        <div className="text-center text-gray-500 italic text-sm max-w-xs">
+                            {comment}
+                        </div>
                     </div>
                 </div>
             </div>
         ))
     : null;
+
+    return (
+        <>
+            <div className="flex content-between flex-wrap justify-center">
+                {displayOrders}
+                <ScrollTrigger onEnter={() => setInViewport(true)} onExit={() => setInViewport(false)} />
+            </div>
+        </>
+    )
 };

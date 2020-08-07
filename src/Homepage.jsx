@@ -73,13 +73,14 @@ const UPDATE_NEW_ORDERS = gql`
 export default function Homepage() {
     const [inViewport, setInViewport] = useState(false);
     const {data: dataNewOrders} = useSubscription(SUBSCRIBE_NEW_ORDERS);
-    const {data: dataOrders, fetchMore: fetchMoreOrders, subscribeToMore: subscribeToMoreOrders} = useQuery(QUERY_ORDERS, {
+    const {loading: loadingOrders, data: dataOrders, fetchMore: fetchMoreOrders, subscribeToMore: subscribeToMoreOrders} = useQuery(QUERY_ORDERS, {
         variables: {
             limit: 20,
             offset: 0
         },
         fetchPolicy: "cache-and-network"
     });
+    const [loading, setLoading] = useState(loadingOrders);
     const {data: dataLengthOrders} = useSubscription(SUBSCRIBE_LENGTH_ORDERS);
     const [updateOrder] = useMutation(UPDATE_NEW_ORDERS);
     const [audio] = useState(new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'));
@@ -107,10 +108,12 @@ export default function Homepage() {
     }, []);
 
     useEffect(() => {
-        if (inViewport && dataOrders && dataLengthOrders && dataOrders.orders.length < dataLengthOrders.orders_aggregate.aggregate.count) {
-            console.log('lentgh', dataOrders.orders.length);
-            console.log('agg', dataLengthOrders.orders_aggregate.aggregate.count);
+        setLoading(loadingOrders);
+    }, [loadingOrders]);
 
+    useEffect(() => {
+        if (inViewport && dataOrders && dataLengthOrders && dataOrders.orders.length < dataLengthOrders.orders_aggregate.aggregate.count) {
+            setLoading(true);
             fetchMoreOrders({
                 variables: {
                     offset: dataOrders.orders.length
@@ -122,7 +125,7 @@ export default function Homepage() {
                     });
                 }
             }).then(() => {
-                console.log('fetched more');
+                setLoading(false);
             });
         }
     // eslint-disable-next-line
@@ -241,6 +244,24 @@ export default function Homepage() {
                 {displayOrders}
                 <ScrollTrigger onEnter={() => setInViewport(true)} onExit={() => setInViewport(false)} />
             </div>
+            {loading ?
+                <div
+                    className="
+                            inline-block
+                            bg-gray-200
+                            rounded-full
+                            px-3
+                            py-1
+                            text-sm
+                            font-semibold
+                            text-gray-700
+                            m-2
+                            flex justify-center mt-10 mb-10
+                        "
+                >
+                    Chargement des données supplémentaires...
+                </div>
+                : null}
         </>
     )
 };

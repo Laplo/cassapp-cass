@@ -3,13 +3,13 @@ import React, {useEffect, useState} from "react";
 import {
     gql,
     useSubscription,
-    useMutation,
+    useMutation, useQuery,
 } from '@apollo/client';
 import ScrollTrigger from 'react-scroll-trigger';
 
-const SUBSCRIBE_ORDERS = gql`
-  subscription MySubscription($limit: Int!) {
-    orders(limit: $limit, order_by: {order_created_at: desc}) {
+const QUERY_ORDERS = gql`
+  query MyQuery($limit: Int!, $offset: Int!) {
+    orders(limit: $limit, offset: $offset, order_by: {order_created_at: desc}) {
       order_id
       comment
       order_created_at
@@ -25,6 +25,16 @@ const SUBSCRIBE_ORDERS = gql`
       }
     }
   }
+`;
+
+const SUBSCRIBE_LENGTH_ORDERS = gql`
+    subscription MySubscription {
+      orders_aggregate {
+        aggregate {
+          count
+        }
+      }
+    }
 `;
 
 const SUBSCRIBE_NEW_ORDERS = gql`
@@ -62,9 +72,15 @@ const UPDATE_NEW_ORDERS = gql`
 
 export default function Homepage() {
     const [inViewport, setInViewport] = useState(false);
-    const [limit, setLimit] = useState(20);
     const {data: dataNewOrders} = useSubscription(SUBSCRIBE_NEW_ORDERS);
-    const {data: dataOrders} = useSubscription(SUBSCRIBE_ORDERS, {variables: {limit}});
+    const {data: dataOrders, fetchMore: fetchMoreOrders, subscribeToMore: subscribeToMoreOrders} = useQuery(QUERY_ORDERS, {
+        variables: {
+            limit: 20,
+            offset: 0
+        },
+        fetchPolicy: "cache-and-network"
+    });
+    const {data: dataLengthOrders} = useSubscription(SUBSCRIBE_LENGTH_ORDERS);
     const [updateOrder] = useMutation(UPDATE_NEW_ORDERS);
     const [audio] = useState(new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'));
 
@@ -76,12 +92,40 @@ export default function Homepage() {
                 console.log(r)
             ));
         }
+        subscribeToMoreOrders({
+            document: SUBSCRIBE_NEW_ORDERS,
+            updateQuery: (prev, { subscriptionData }) => {
+                if (!subscriptionData.data.orders.length) return prev;
+                const newOrder = subscriptionData.data.orders;
+                console.log(prev.orders.length)
+                return Object.assign({}, prev, {
+                    orders: [newOrder, ...prev.orders]
+                });
+            }
+        })
+    // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
-        if (inViewport) {
-            setLimit(l => l + 20);
+        if (inViewport && dataOrders && dataLengthOrders && dataOrders.orders.length < dataLengthOrders.orders_aggregate.aggregate.count) {
+            console.log('lentgh', dataOrders.orders.length);
+            console.log('agg', dataLengthOrders.orders_aggregate.aggregate.count);
+
+            fetchMoreOrders({
+                variables: {
+                    offset: dataOrders.orders.length
+                },
+                updateQuery: (prev, {fetchMoreResult}) => {
+                    if (!fetchMoreResult) return prev;
+                    return Object.assign({}, prev, {
+                        orders: [...prev.orders, ...fetchMoreResult.orders]
+                    });
+                }
+            }).then(() => {
+                console.log('fetched more');
+            });
         }
+    // eslint-disable-next-line
     }, [inViewport]);
 
     useEffect(() => {
@@ -130,17 +174,25 @@ export default function Homepage() {
         }) => (
             <div style={{
                 borderTop: "3px solid #48bb78",
-                minWidth: "20%"
+                width: "30%",
+                minWidth: "300px"
             }}
             key={order_id}
             className="
                 rounded-t-lg
                 rounded-b-sm
                 overflow-hidden
-                shadow-2xl
+                shadow-xl
                 m-5
                 bg-gray-700
-                hover:bg-gray-600
+                flex-none
+                hover:bg-gray-900
+                transform
+                hover:translate-y-1
+                hover:scale-105
+                hover:shadow-2xl
+                transition
+                duration-500
             ">
                 <div className="mr-5 ml-5">
                     <div className="px-6 py-4">
@@ -150,7 +202,7 @@ export default function Homepage() {
                             </div>
                             <span className="text-gray-500">{transformDate(order_created_at)}</span>
                         </div>
-                        <div className="py-4">
+                        <div className="py-4 text-center">
                             <span
                                 className="
                                     inline-block
@@ -161,44 +213,20 @@ export default function Homepage() {
                                     text-sm
                                     font-semibold
                                     text-gray-700
-                                    mr-2"
+                                    m-2
+                                    hover:bg-green-500
+                                    transform
+                                    hover:translate-y-1
+                                    hover:text-white
+                                    hover:scale-110
+                                    transition
+                                    duration-200
+                                    "
                             >
-                                {quantity}
+                                {quantity} {alcohol ? alcohol.alcohol_name : ''} {soft ? soft.soft_name : ''}
                             </span>
-                            {alcohol ?
-                                <span
-                                    className="
-                                        inline-block
-                                        bg-gray-200
-                                        rounded-full
-                                        px-3
-                                        py-1
-                                        text-sm
-                                        font-semibold
-                                        text-gray-700
-                                        mr-2"
-                                >
-                                    {alcohol.alcohol_name}
-                                </span>
-                            : null}
-                            {soft ?
-                                <span
-                                    className="
-                                        inline-block
-                                        bg-gray-200
-                                        rounded-full
-                                        px-3
-                                        py-1
-                                        text-sm
-                                        font-semibold
-                                        text-gray-700
-                                        mr-2"
-                                >
-                                   {soft.soft_name}
-                                </span>
-                            : null}
                         </div>
-                        <div className="text-center text-gray-500 italic text-sm max-w-xs">
+                        <div className="text-center text-gray-500 italic text-sm hover:text-green-100">
                             {comment}
                         </div>
                     </div>
@@ -209,7 +237,7 @@ export default function Homepage() {
 
     return (
         <>
-            <div className="flex content-between flex-wrap justify-center">
+            <div className="flex flex-wrap justify-center mt-10 mb-10">
                 {displayOrders}
                 <ScrollTrigger onEnter={() => setInViewport(true)} onExit={() => setInViewport(false)} />
             </div>

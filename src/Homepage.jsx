@@ -86,19 +86,12 @@ export default function Homepage() {
     const [audio] = useState(new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'));
 
     useEffect(() => {
-        if (!("Notification" in window)) {
-            console.log("This browser does not support desktop notification");
-        } else {
-            Notification.requestPermission().then(r => (
-                console.log(r)
-            ));
-        }
+        audio.muted = true;
         subscribeToMoreOrders({
             document: SUBSCRIBE_NEW_ORDERS,
             updateQuery: (prev, { subscriptionData }) => {
                 if (!subscriptionData.data.orders.length) return prev;
                 const newOrder = subscriptionData.data.orders;
-                console.log(prev.orders.length)
                 return Object.assign({}, prev, {
                     orders: [newOrder, ...prev.orders]
                 });
@@ -139,12 +132,10 @@ export default function Homepage() {
                 icon: 'android-chrome-192x192.png',
                 body: quantity,
             });
-            updateOrder({variables: {order_id}}).then(() => {
-                console.log('updated');
-            });
+            updateOrder({variables: {order_id}}).then(r => r);
             n.onshow = () => {
                 audio.currentTime = 0;
-                audio.play();
+                audio.play().then(r => r);
                 setTimeout(() => audio.pause(), 6000);
             };
             n.onclose = () => audio.pause();
@@ -245,8 +236,9 @@ export default function Homepage() {
                 <ScrollTrigger onEnter={() => setInViewport(true)} onExit={() => setInViewport(false)} />
             </div>
             {loading ?
-                <div
-                    className="
+                <div className="flex justify-center">
+                    <div
+                        className="
                             inline-block
                             bg-gray-200
                             rounded-full
@@ -255,11 +247,12 @@ export default function Homepage() {
                             text-sm
                             font-semibold
                             text-gray-700
-                            m-2
+                            w-1/4
                             flex justify-center mt-10 mb-10
                         "
-                >
-                    Chargement des données supplémentaires...
+                    >
+                        Chargement des données supplémentaires...
+                    </div>
                 </div>
                 : null}
         </>

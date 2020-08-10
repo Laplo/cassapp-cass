@@ -130,6 +130,14 @@ export default function Homepage({ barId }) {
     useEffect(() => {
         if (!dataNewOrders || !dataNewOrders.orders.length) return;
 
+        if (!("Notification" in window)) {
+            console.log("This browser does not support desktop notification");
+        } else {
+            Notification.requestPermission().then(r => (
+                console.log(r)
+            ));
+        }
+
         dataNewOrders.orders.forEach(({table, quantity, order_id}) => {
             const n = new Notification(table.table_name + " commande ", {
                 icon: 'android-chrome-192x192.png',

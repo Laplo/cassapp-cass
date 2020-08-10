@@ -6,14 +6,6 @@ import * as serviceWorker from './serviceWorker';
 
 require('dotenv').config();
 
-if (!("Notification" in window)) {
-    console.log("This browser does not support desktop notification");
-} else {
-    Notification.requestPermission().then(r => (
-        console.log(r)
-    ));
-}
-
 ReactDOM.render(
   <React.StrictMode>
     <App />

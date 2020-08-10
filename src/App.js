@@ -1,52 +1,19 @@
 import React from 'react';
-import {ApolloClient, ApolloProvider, HttpLink, InMemoryCache, split} from "@apollo/client";
-import {getMainDefinition} from "@apollo/client/utilities";
-import {WebSocketLink} from "@apollo/client/link/ws";
-import UUIDValidation from "./UUIDValidation";
+import {validate, version} from "uuid";
+import Provide from "./Bar";
+import BarContext from "./BarContext";
 
 function App() {
 
-    const headers = {
-        'x-hasura-admin-secret': process.env.REACT_APP_APOLLO_ADMIN_KEY,
-    };
-    const httpLink = new HttpLink({
-        uri: 'http' + process.env.REACT_APP_APOLLO_URL,
-        headers,
-    });
-    const wsLink = new WebSocketLink({
-        uri: 'ws' + process.env.REACT_APP_APOLLO_URL,
-        options: {
-            reconnect: true,
-            connectionParams: {
-                headers,
-            },
-        },
-    });
-    const link = split(
-        ({query}) => {
-            const definition = getMainDefinition(query);
-            return (
-                definition.kind === 'OperationDefinition' &&
-                definition.operation === 'subscription'
-            );
-        },
-        wsLink,
-        httpLink,
-    );
-    const client = new ApolloClient({
-        link,
-        cache: new InMemoryCache(),
-    });
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const paramB = urlSearchParams.get('b');
+    const barConnectionId = paramB ? (validate(paramB) && version(paramB) === 4 ? paramB : undefined) : undefined;
 
-
-    return (
-        <ApolloProvider client={client}>
-            <div className="App">
-                <UUIDValidation />
-            </div>
-        </ApolloProvider>
-    );
-
+    return barConnectionId ?
+        <BarContext.Provider value={{barConnectionId}}>
+            <Provide />
+        </BarContext.Provider>
+        : <p>Recherche de bars impossible...</p>;
 }
 
 export default App;

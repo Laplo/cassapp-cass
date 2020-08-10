@@ -18,7 +18,8 @@
     "react-web-notifications": "1.1.0",
     "subscriptions-transport-ws": "0.9.17",
     "tailwind": "4.0.0",
-    "tailwindcss": "1.6.2"
+    "tailwindcss": "1.6.2",
+    "uuid": "^8.3.0"
   },
   "scripts": {
     "start": "npm run watch:css && react-scripts start",

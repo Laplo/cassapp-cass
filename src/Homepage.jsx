@@ -3,7 +3,8 @@ import React, {useEffect, useState} from "react";
 import {
     gql,
     useSubscription,
-    useMutation, useQuery,
+    useMutation,
+    useQuery,
 } from '@apollo/client';
 import ScrollTrigger from 'react-scroll-trigger';
 

@@ -1,4 +1,4 @@
-import {useQuery, gql, HttpLink, split, ApolloClient, InMemoryCache, ApolloProvider} from "@apollo/client";
+import {ApolloClient, ApolloProvider, gql, HttpLink, InMemoryCache, split, useQuery} from "@apollo/client";
 import Homepage from "./Homepage";
 import React, {useContext, useEffect, useState} from "react";
 import {WebSocketLink} from "@apollo/client/link/ws";
@@ -6,13 +6,7 @@ import {getMainDefinition} from "@apollo/client/utilities";
 import BarContext from "./BarContext";
 import Dashboard from "./Dashboard";
 
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
-    useLocation
-} from "react-router-dom";
+import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-router-dom";
 
 const QUERY_BAR = gql`
     query MyQuery($barConnectionId: uuid!) {

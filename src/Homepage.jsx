@@ -176,7 +176,6 @@ export default function Homepage({ barId }) {
             order_lines
         }) => (
             <div style={{
-                borderTop: "3px solid #48bb78",
                 width: "30%",
                 minWidth: "300px"
             }}
@@ -196,6 +195,8 @@ export default function Homepage({ barId }) {
                     hover:shadow-2xl
                     transition
                     duration-500
+                    border-green-500
+                    border-t-4
             ">
                 <div className="mr-5 ml-5">
                     <div className="px-6 py-4">

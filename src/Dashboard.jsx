@@ -133,7 +133,7 @@ export default function Dashboard({ barId }) {
                         text-sm
                         font-semibold
                         text-gray-700
-                        w-1/6
+                        w-1/4
                         mr-2
                         ml-2
                         mt-3
@@ -145,6 +145,8 @@ export default function Dashboard({ barId }) {
                         hover:text-white
                         transition
                         duration-500
+                        border-green-500
+                        border-t-2
                     "
             >
                 <span>
@@ -171,7 +173,7 @@ export default function Dashboard({ barId }) {
                         text-sm
                         font-semibold
                         text-gray-700
-                        w-1/5
+                        w-1/4
                         mr-2
                         ml-2
                         mt-3
@@ -183,6 +185,8 @@ export default function Dashboard({ barId }) {
                         hover:text-white
                         transition
                         duration-500
+                        border-green-700
+                        border-t-2
                     "
             >
                 <span>
@@ -223,12 +227,12 @@ export default function Dashboard({ barId }) {
                 </div>
                 <div className="flex justify-center mt-10 mb-10">
                     <form id="formTable" className="w-1/5 mr-56" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormTable();}}>
-                        <div className="flex items-center border-b border-gray-500 py-2">
+                        <div className="flex items-center border-b border-gray-700 py-2">
                             <input
-                                className="appearance-none bg-transparent border-none w-full text-gray-700 mr-1 py-1 px-1 leading-tight focus:outline-none"
-                                type="text" placeholder="Ajouter une table" aria-label="Table name" id="tableNameInput" />
+                                className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
+                                type="text" placeholder="Ajouter une table" aria-label="Table name" id="tableNameInput" required/>
                             <button
-                                className="flex-shrink-0 bg-gray-500 hover:bg-gray-700 border-gray-500 hover:border-gray-700 text-sm border-4 text-white py-1 px-2 rounded"
+                                className="flex-shrink-0 bg-gray-700 hover:bg-gray-900 border-gray-700 hover:border-gray-900 text-sm border-4 text-white py-1 px-2 rounded"
                                 type="submit">
                                 Ajouter
                             </button>
@@ -246,15 +250,15 @@ export default function Dashboard({ barId }) {
                 </div>
                 <div className="flex justify-center mt-10 mb-10">
                     <form id="formDrink" className="w-1/5 mr-56" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormDrink();}}>
-                        <div className="flex items-center border-b border-gray-500 py-2">
+                        <div className="flex items-center border-b border-gray-700 py-2">
                             <input
-                                className="appearance-none bg-transparent border-none w-full text-gray-700 mr-1 py-1 px-1 leading-tight focus:outline-none"
-                                type="text" placeholder="Nom boisson" aria-label="Drink name" id="drinkNameInput" />
+                                className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
+                                type="text" placeholder="Nom boisson" aria-label="Drink name" id="drinkNameInput" required/>
                             <input
-                                className="appearance-none bg-transparent border-none w-full text-gray-700 mr-1 py-1 px-1 leading-tight focus:outline-none"
-                                type="text" placeholder="Prix boisson" aria-label="Drink price" id="drinkPriceInput" />
+                                className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
+                                type="number" placeholder="Prix boisson" aria-label="Drink price" id="drinkPriceInput" required/>
                             <button
-                                className="flex-shrink-0 bg-gray-500 hover:bg-gray-700 border-gray-500 hover:border-gray-700 text-sm border-4 text-white py-1 px-2 rounded"
+                                className="flex-shrink-0 bg-gray-700 hover:bg-gray-900 border-gray-700 hover:border-gray-900 text-sm border-4 text-white py-1 px-2 rounded"
                                 type="submit">
                                 Ajouter
                             </button>

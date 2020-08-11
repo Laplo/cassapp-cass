@@ -1,118 +1,48 @@
-import {ApolloClient, ApolloProvider, gql, HttpLink, InMemoryCache, split, useQuery} from "@apollo/client";
 import Homepage from "./Homepage";
-import React, {useContext, useEffect, useState} from "react";
-import {WebSocketLink} from "@apollo/client/link/ws";
-import {getMainDefinition} from "@apollo/client/utilities";
-import BarContext from "./BarContext";
+import React, {useEffect, useState} from "react";
 import Dashboard from "./Dashboard";
-import {useKeycloak} from "@react-keycloak/web";
 
 
 import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-router-dom";
 
-const QUERY_BAR = gql`
-    query MyQuery($barConnectionId: uuid!) {
-      bars(where: {bar_connection_id: {_eq: $barConnectionId}}) {
-        bar_id
-      }
-    }
-`;
-
-export default function Provide() {
-
-    const { initialized, keycloak } = useKeycloak();
-
-    const headers = {
-        Authorization: `Bearer ${keycloak.token}`
-    };
-    const httpLink = new HttpLink({
-        uri: 'http' + process.env.REACT_APP_APOLLO_URL,
-        headers,
-    });
-    const wsLink = new WebSocketLink({
-        uri: 'ws' + process.env.REACT_APP_APOLLO_URL,
-        options: {
-            reconnect: true,
-            connectionParams: {
-                headers,
-            },
-        },
-    });
-    const link = split(
-        ({query}) => {
-            const definition = getMainDefinition(query);
-            return (
-                definition.kind === 'OperationDefinition' &&
-                definition.operation === 'subscription'
-            );
-        },
-        wsLink,
-        httpLink,
-    );
-    const client = new ApolloClient({
-        link,
-        cache: new InMemoryCache(),
-    });
-
-    return initialized ?
-        <ApolloProvider client={client}>
-            <div className="App">
-                <Bar />
+export default function Bar({ barId }) {
+    return (
+        <Router>
+            <div>
+                <nav>
+                    <ul>
+                        <li>
+                            <DynamicLink />
+                        </li>
+                    </ul>
+                </nav>
             </div>
-        </ApolloProvider>
-    : null;
-}
-
-function Bar() {
-    const { barConnectionId } = useContext(BarContext);
-    const { data, loading, error } = useQuery(QUERY_BAR, { variables : { barConnectionId: barConnectionId }});
-
-    return loading ?
-        <p>Chargement...</p>
-        : (
-            data && data.bars.length ?
-                <Router>
-                    <div>
-                        <nav>
-                            <ul>
-                                <li>
-                                    <DynamicLink />
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                    <Switch>
-                        <Route path="/dashboard">
-                            <Dashboard barId={data.bars[0].bar_id} />
-                        </Route>
-                        <Route path="/">
-                            <Homepage barId={data.bars[0].bar_id} />
-                        </Route>
-                    </Switch>
-                </Router>
-                : (
-                    error ?
-                        <p>Une erreur est survenue...</p>
-                        : <p>Aucun bar trouvé...</p>
-                )
-        );
+            <Switch>
+                <Route path="/dashboard">
+                    <Dashboard barId={barId} />
+                </Route>
+                <Route path="/">
+                    <Homepage barId={barId} />
+                </Route>
+            </Switch>
+        </Router>
+    );
 }
 
 
 function DynamicLink() {
-    const { barConnectionId } = useContext(BarContext);
     const location = useLocation();
     const [ link, setLink ] = useState({
-        pathname: (location.pathname === '/' ? '/dashboard?b=' : '/?b=') + barConnectionId,
+        pathname: (location.pathname === '/' ? '/dashboard' : '/') ,
         name: location.pathname === '/' ? 'Panneau d\'administration' : 'Commandes'
     });
 
     useEffect(() => {
         setLink(l => ({
-            pathname: (location.pathname === '/' ? '/dashboard?b=' : '/?b=') + barConnectionId,
+            pathname: (location.pathname === '/' ? '/dashboard' : '/'),
             name: location.pathname === '/' ? 'Panneau d\'administration' : 'Commandes'
         }));
-    }, [location, barConnectionId]);
+    }, [location]);
 
     return (
         <Link to={link.pathname}>

@@ -4,11 +4,19 @@ import App from './App';
 import './assets/main.css'
 import * as serviceWorker from './serviceWorker';
 
+import {KeycloakProvider} from "@react-keycloak/web";
+import {keycloak, keycloakProviderInitConfig} from "./keycloak";
+
 require('dotenv').config();
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+      <KeycloakProvider
+          keycloak={keycloak}
+          initConfig={keycloakProviderInitConfig}
+      >
+        <App />
+      </KeycloakProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

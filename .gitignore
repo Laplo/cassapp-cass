@@ -25,4 +25,5 @@ yarn-error.log*
 /.idea
 .env
 *.iml
+keycloak.json
 

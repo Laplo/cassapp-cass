@@ -5,6 +5,8 @@ import {WebSocketLink} from "@apollo/client/link/ws";
 import {getMainDefinition} from "@apollo/client/utilities";
 import BarContext from "./BarContext";
 import Dashboard from "./Dashboard";
+import {useKeycloak} from "@react-keycloak/web";
+
 
 import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-router-dom";
 
@@ -17,8 +19,11 @@ const QUERY_BAR = gql`
 `;
 
 export default function Provide() {
+
+    const { initialized, keycloak } = useKeycloak();
+
     const headers = {
-        'x-hasura-admin-secret': process.env.REACT_APP_APOLLO_ADMIN_KEY,
+        Authorization: `Bearer ${keycloak.token}`
     };
     const httpLink = new HttpLink({
         uri: 'http' + process.env.REACT_APP_APOLLO_URL,
@@ -49,14 +54,13 @@ export default function Provide() {
         cache: new InMemoryCache(),
     });
 
-    return (
+    return initialized ?
         <ApolloProvider client={client}>
             <div className="App">
                 <Bar />
             </div>
         </ApolloProvider>
-    );
-
+    : null;
 }
 
 function Bar() {

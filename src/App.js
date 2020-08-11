@@ -5,12 +5,15 @@ import {WebSocketLink} from "@apollo/client/link/ws";
 import {getMainDefinition} from "@apollo/client/utilities";
 import Bar from "./Bar";
 
-function App() {
-    const { initialized, keycloak } = useKeycloak();
+function ApolloProvide({barId, token}) {
 
     const headers = {
-        Authorization: `Bearer ${keycloak.token}`
+        Authorization: `Bearer ${token}`,
+        'X-Hasura-User-Id': barId
     };
+
+    console.log(headers);
+
     const httpLink = new HttpLink({
         uri: 'http' + process.env.REACT_APP_APOLLO_URL,
         headers,
@@ -40,15 +43,21 @@ function App() {
         cache: new InMemoryCache(),
     });
 
-    console.log(initialized ? keycloak.tokenParsed.sub : initialized)
-
-    return initialized ?
+    return (
         <ApolloProvider client={client}>
             <div className="App">
-                <Bar userId={keycloak.tokenParsed.sub}/>
+                <Bar barId={barId}/>
             </div>
         </ApolloProvider>
-        : <span>err</span>;
+    );
+}
+
+function App() {
+    const { initialized, keycloak } = useKeycloak();
+
+    return initialized ?
+        <ApolloProvide barId={keycloak.tokenParsed.sub} token={keycloak.token}/>
+        : <span>loading</span>;
 }
 
 export default App;

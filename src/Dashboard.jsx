@@ -108,22 +108,24 @@ export default function Dashboard({ barId }) {
     const [ deleteCategories ] = useMutation(DELETE_CATEGORIES);
     categoriesApi.subscribe(state => setDataCategories(state.categories));
 
-    useEffect(() => {
-        if (data && data.tables && !tablesCached) {
-            tablesApi.setState({tables: data.tables, cached: true});
+    const updateState = (datas, elementsName, cached, api) => {
+        if (datas && datas[elementsName] && !cached) {
+            const obj = {cached: true};
+            obj[elementsName] = datas[elementsName];
+            api.setState(obj);
         }
+    };
+
+    useEffect(() => {
+        updateState(data, 'tables', tablesCached, tablesApi);
     }, [data, tablesCached]);
 
     useEffect(() => {
-        if (data && data.items && !itemsCached) {
-            itemsApi.setState({items: data.items, cached: true});
-        }
+        updateState(data, 'items', itemsCached, itemsApi);
     }, [data, itemsCached]);
 
     useEffect(() => {
-        if (datasCategories && datasCategories.categories && !categoriesCached) {
-            categoriesApi.setState({categories: datasCategories.categories, cached: true});
-        }
+        updateState(datasCategories, 'categories', categoriesCached, categoriesApi);
     }, [datasCategories, categoriesCached]);
 
     const handleOnClickTableCross = tableId => {

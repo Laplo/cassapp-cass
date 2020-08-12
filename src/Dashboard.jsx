@@ -290,7 +290,7 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className="flex justify-center mt-10 mb-10">
-                    <form id="formItem" className="w-1/5 mr-56" onSubmit={e => {e.preventDefault(); e.stopPropagation();handleSubmitFormItem(categoryId);}}>
+                    <form id={`${categoryId}FormId`} className="w-1/5 mr-56" onSubmit={e => {e.preventDefault(); e.stopPropagation();handleSubmitFormItem(categoryId);}}>
                         <div className="flex items-center border-b border-gray-700 py-2">
                             <input
                                 className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
@@ -361,7 +361,7 @@ export default function Dashboard() {
                 {displayCategories}
                 <div className="border-2 ml-auto mr-auto" style={{width: '95%'}}/>
                 <div className="flex justify-center mt-10 mb-10">
-                    <form id="formCategory" className="w-1/2" id="formCategory" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormCategory();}}>
+                    <form className="w-1/2" id="formCategory" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormCategory();}}>
                         <div className="flex items-center border-b border-gray-700 py-2">
                             <input
                                 className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"

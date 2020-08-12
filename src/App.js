@@ -11,9 +11,7 @@ function ApolloProvide({barId, token}) {
         Authorization: `Bearer ${token}`,
         'X-Hasura-User-Id': barId
     };
-
-    console.log(headers);
-
+    
     const httpLink = new HttpLink({
         uri: 'http' + process.env.REACT_APP_APOLLO_URL,
         headers,

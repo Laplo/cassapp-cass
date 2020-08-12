@@ -22,7 +22,8 @@
     "subscriptions-transport-ws": "0.9.17",
     "tailwind": "4.0.0",
     "tailwindcss": "1.6.2",
-    "uuid": "8.3.0"
+    "uuid": "8.3.0",
+    "zustand": "^2.2.4"
   },
   "scripts": {
     "start": "npm run watch:css && react-scripts start",

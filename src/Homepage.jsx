@@ -17,8 +17,8 @@ const QUERY_ORDERS = gql`
         }
         order_lines {
           comment
-          drink {
-            drink_name
+          item {
+            item_name
           }
           quantity
           order_line_id
@@ -47,8 +47,8 @@ const SUBSCRIBE_NEW_ORDERS = gql`
         }
         order_lines {
           comment
-          drink {
-            drink_name
+          item {
+            item_name
           }
           quantity
           order_line_id

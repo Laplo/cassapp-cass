@@ -26,6 +26,14 @@ const DELETE_CATEGORIES = gql`
     }
 `;
 
+const INSERT_CATEGORY = gql`
+    mutation MyMutation2($categoryName: name!, $barId: uuid!) {
+      insert_categories_one(object: {bar_id: $barId, category_name: $categoryName}) {
+        category_id
+      }
+    }
+`;
+
 const QUERY_TABLES_AND_ITEMS = gql`
     query MyQuery($barId: uuid!) {
       tables(where: {bar_id: {_eq: $barId}, table_deleted_at: {_is_null: true}}, order_by: {table_name: asc}) {
@@ -116,6 +124,7 @@ export default function Dashboard() {
     const { data: datasCategories, loading: loadingCategories } = useQuery(QUERY_CATEGORIES, { variables : { barId }});
     const [ dataCategories, setDataCategories ] = useState(storeCategories || (datasCategories ? datasCategories.categories : []));
     const [ deleteCategories ] = useMutation(DELETE_CATEGORIES);
+    const [ insertCategory ] = useMutation(INSERT_CATEGORY);
     categoriesApi.subscribe(state => setDataCategories(state.categories));
 
     useEffect(() => {
@@ -165,8 +174,8 @@ export default function Dashboard() {
     };
 
     const handleSubmitFormItem = categoryId => {
-        const itemName = document.getElementById('itemNameInput').value;
-        const itemPrice = document.getElementById('itemPriceInput').value * 100;
+        const itemName = document.getElementById(`${categoryId}NameInput`).value;
+        const itemPrice = document.getElementById(`${categoryId}PriceInput`).value * 100;
 
         if (itemName && itemPrice) {
             insertItem({variables : { categoryId, itemName, itemPrice }})
@@ -174,9 +183,19 @@ export default function Dashboard() {
                     itemsApi.setState(d => ({ items : [ ...d.items, { item_id, item_name: itemName, item_price: itemPrice, category_id: categoryId } ] }));
                 })
                 .then(() => {
-                    document.getElementById('itemNameInput').value = '';
-                    document.getElementById('itemPriceInput').value = '';
+                    document.getElementById(`${categoryId}NameInput`).value = '';
+                    document.getElementById(`${categoryId}PriceInput`).value = '';
                 });
+        }
+    };
+
+    const handleSubmitFormCategory = () => {
+        const categoryName = document.getElementById('categoryNameInput').value;
+
+        if (categoryName) {
+            insertCategory({variables : { categoryName, barId }})
+                .then(({data: {insert_categories_one: {category_id}}}) => categoriesApi.setState(d => ({ categories: [ ...d.categories, { category_id, category_name: categoryName } ] })))
+                .then(() => document.getElementById('categoryNameInput').value = '')
         }
     };
 
@@ -244,7 +263,7 @@ export default function Dashboard() {
                         hover:text-white
                         transition
                         duration-500
-                        border-green-700
+                        border-green-500
                         border-t-2
                     "
             >
@@ -261,7 +280,7 @@ export default function Dashboard() {
     const displayCategories = dataCategories ?
         dataCategories.map(({category_id: categoryId, category_name: categoryName}) => (
             <div key={categoryId}>
-                <div className="border-2" />
+                <div className="border-2 ml-auto mr-auto" style={{width: '95%'}}/>
                 <div className="flex justify-center">
                     <div className="flex justify-center mt-5 mb-5 py-1 border-b-2 border-gray-600 w-56">
                         {categoryName}
@@ -275,10 +294,10 @@ export default function Dashboard() {
                         <div className="flex items-center border-b border-gray-700 py-2">
                             <input
                                 className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
-                                type="text" placeholder="Nom boisson" aria-label="item name" id="itemNameInput" required/>
+                                type="text" placeholder={`Nom ${categoryName}`} aria-label="item name" id={`${categoryId}NameInput`} required/>
                             <input
                                 className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
-                                type="number" placeholder="Prix boisson" aria-label="item price" id="itemPriceInput" required/>
+                                type="number" placeholder={`Prix ${categoryName}`} aria-label="item price" id={`${categoryId}PriceInput`} required/>
                             <button
                                 className="flex-shrink-0 bg-gray-700 hover:bg-gray-900 border-gray-700 hover:border-gray-900 text-sm border-4 text-white py-1 px-2 rounded"
                                 type="submit">
@@ -340,5 +359,20 @@ export default function Dashboard() {
                     </div>
                 </div>
                 {displayCategories}
+                <div className="border-2 ml-auto mr-auto" style={{width: '95%'}}/>
+                <div className="flex justify-center mt-10 mb-10">
+                    <form id="formCategory" className="w-1/2" id="formCategory" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormCategory();}}>
+                        <div className="flex items-center border-b border-gray-700 py-2">
+                            <input
+                                className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
+                                type="text" placeholder="Ajouter une catégorie" aria-label="Category name" id="categoryNameInput" required/>
+                            <button
+                                className="flex-shrink-0 bg-gray-700 hover:bg-gray-900 border-gray-700 hover:border-gray-900 text-sm border-4 text-white py-1 px-2 rounded"
+                                type="submit">
+                                Ajouter
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </>;
 }

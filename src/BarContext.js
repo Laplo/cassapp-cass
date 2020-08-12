@@ -1,7 +1,7 @@
 import {createContext} from "react";
 
 const BarContext = createContext({
-    barConnectionId:  undefined
+    barId:  undefined
 });
 
 export default BarContext;

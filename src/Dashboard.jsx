@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 
 import create from 'zustand';
 
@@ -7,6 +7,7 @@ import {
     useMutation,
     useQuery,
 } from '@apollo/client';
+import BarContext from "./BarContext";
 
 const QUERY_CATEGORIES = gql`
     query MyQuery($barId: uuid!) {
@@ -85,8 +86,17 @@ const [, itemsApi] = create(() => ({
     items: []
 }));
 
+const updateState = (datas, elementsName, cached, api) => {
+    if (datas && datas[elementsName] && !cached) {
+        const obj = {cached: true};
+        obj[elementsName] = datas[elementsName];
+        api.setState(obj);
+    }
+};
 
-export default function Dashboard({ barId }) {
+export default function Dashboard() {
+
+    const { barId } = useContext(BarContext);
 
     const { data, loading } = useQuery(QUERY_TABLES_AND_ITEMS, { variables : { barId }});
 
@@ -107,14 +117,6 @@ export default function Dashboard({ barId }) {
     const [ dataCategories, setDataCategories ] = useState(storeCategories || (datasCategories ? datasCategories.categories : []));
     const [ deleteCategories ] = useMutation(DELETE_CATEGORIES);
     categoriesApi.subscribe(state => setDataCategories(state.categories));
-
-    const updateState = (datas, elementsName, cached, api) => {
-        if (datas && datas[elementsName] && !cached) {
-            const obj = {cached: true};
-            obj[elementsName] = datas[elementsName];
-            api.setState(obj);
-        }
-    };
 
     useEffect(() => {
         updateState(data, 'tables', tablesCached, tablesApi);

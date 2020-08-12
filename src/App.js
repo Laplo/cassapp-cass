@@ -4,6 +4,7 @@ import {ApolloClient, ApolloProvider, HttpLink, InMemoryCache, split} from "@apo
 import {WebSocketLink} from "@apollo/client/link/ws";
 import {getMainDefinition} from "@apollo/client/utilities";
 import Bar from "./Bar";
+import BarContext from "./BarContext";
 
 function ApolloProvide({barId, token}) {
 
@@ -11,7 +12,7 @@ function ApolloProvide({barId, token}) {
         Authorization: `Bearer ${token}`,
         'X-Hasura-User-Id': barId
     };
-    
+
     const httpLink = new HttpLink({
         uri: 'http' + process.env.REACT_APP_APOLLO_URL,
         headers,
@@ -43,9 +44,11 @@ function ApolloProvide({barId, token}) {
 
     return (
         <ApolloProvider client={client}>
-            <div className="App">
-                <Bar barId={barId}/>
-            </div>
+            <BarContext.Provider value={{barId}}>
+                <div className="App">
+                    <Bar />
+                </div>
+            </BarContext.Provider>
         </ApolloProvider>
     );
 }

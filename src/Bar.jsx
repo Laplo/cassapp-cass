@@ -5,7 +5,7 @@ import Dashboard from "./Dashboard";
 
 import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-router-dom";
 
-export default function Bar({ barId }) {
+export default function Bar() {
     return (
         <Router>
             <div>
@@ -19,10 +19,10 @@ export default function Bar({ barId }) {
             </div>
             <Switch>
                 <Route path="/dashboard">
-                    <Dashboard barId={barId} />
+                    <Dashboard />
                 </Route>
                 <Route path="/">
-                    <Homepage barId={barId} />
+                    <Homepage />
                 </Route>
             </Switch>
         </Router>

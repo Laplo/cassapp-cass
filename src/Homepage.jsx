@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 
 import {
     gql,
@@ -7,6 +7,7 @@ import {
     useQuery,
 } from '@apollo/client';
 import ScrollTrigger from 'react-scroll-trigger';
+import BarContext from "./BarContext";
 
 const QUERY_ORDERS = gql`
     query MyQuery($barId: uuid!, $limit: Int!, $offset: Int!) {
@@ -70,7 +71,10 @@ const UPDATE_NEW_ORDERS = gql`
 `;
 
 
-export default function Homepage({ barId }) {
+export default function Homepage() {
+
+    const { barId } = useContext(BarContext);
+
     const [inViewport, setInViewport] = useState(false);
     const {data: dataNewOrders} = useSubscription(SUBSCRIBE_NEW_ORDERS, { variables: { barId }});
     const {loading: loadingOrders, data: dataOrders, fetchMore: fetchMoreOrders, subscribeToMore: subscribeToMoreOrders} = useQuery(QUERY_ORDERS, {

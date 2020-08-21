@@ -161,12 +161,15 @@ export default function Dashboard() {
     }
 
     const handleOnClickTableCross = (tableId, tableName) => {
-        deleteTables({variables : { tableId }})
-            .then(() => {
-                const tables = dataTables.filter(({table_id}) => table_id !== tableId);
-                tablesApi.setState({tables});
-            })
-            .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">{tableName} supprimée avec succès</p></div>))
+        if (window.confirm('Etes vous sur de vouloir supprimer ' + tableName + ' ?')) {
+            deleteTables({variables: {tableId}})
+                .then(() => {
+                    const tables = dataTables.filter(({table_id}) => table_id !== tableId);
+                    tablesApi.setState({tables});
+                })
+                .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p
+                    className="text-sm">{tableName} supprimée avec succès</p></div>))
+        }
     };
 
     const handleOnClickDownloadQRCode = (tableId, tableName) => {
@@ -185,21 +188,27 @@ export default function Dashboard() {
     const handleOnClickPrintQRCode = tableId => setRedirect(tableId);
 
     const handleOnClickItemCross = (itemId, itemName) => {
-        deleteItems({variables : { itemId }})
-            .then(() => {
-                const items = dataItems.filter(({item_id}) => item_id !== itemId);
-                itemsApi.setState({items});
-            })
-            .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">"{itemName}" supprimé avec succès</p></div>))
+        if (window.confirm('Etes vous sur de vouloir supprimer ' + itemName + ' ?')) {
+            deleteItems({variables: {itemId}})
+                .then(() => {
+                    const items = dataItems.filter(({item_id}) => item_id !== itemId);
+                    itemsApi.setState({items});
+                })
+                .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p
+                    className="text-sm">"{itemName}" supprimé avec succès</p></div>))
+        }
     };
 
     const handleOnClickCategoryCross = (categoryId, categoryName) => {
-        deleteCategories({variables : { categoryId }})
-            .then(() => {
-                const categories = dataCategories.filter(({category_id}) => category_id !== categoryId);
-                categoriesApi.setState({categories});
-            })
-            .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">"{categoryName}" supprimée avec succès</p></div>))
+        if (window.confirm('Etes vous sur de vouloir supprimer ' + categoryName + ' ?')) {
+            deleteCategories({variables: {categoryId}})
+                .then(() => {
+                    const categories = dataCategories.filter(({category_id}) => category_id !== categoryId);
+                    categoriesApi.setState({categories});
+                })
+                .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p
+                    className="text-sm">"{categoryName}" supprimée avec succès</p></div>))
+        }
     };
 
     const handleSubmitFormTable = () => {

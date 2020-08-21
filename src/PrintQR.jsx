@@ -9,9 +9,7 @@ export default function PrintQR() {
     const {tableId} = useParams();
 
     useEffect(() => {
-        if (tableId !== 'dashboard') {
-            window.print();
-        }
+        if(tableId !== 'dashboard') setTimeout(() => window.print());
     });
 
     return tableId !== 'dashboard' ?

@@ -1,6 +1,10 @@
 import React, {useContext, useEffect, useState} from "react";
 
 import create from 'zustand';
+import QRCode  from 'qrcode.react';
+
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import {
     gql,
@@ -10,8 +14,6 @@ import {
 import BarContext from "./BarContext";
 
 import './Dashboard.css';
-
-import QRCode  from 'qrcode.react';
 
 const QUERY_CATEGORIES = gql`
     query MyQuery($barId: uuid!) {
@@ -139,6 +141,8 @@ export default function Dashboard() {
     const [ insertCategory ] = useMutation(INSERT_CATEGORY);
     categoriesApi.subscribe(state => setDataCategories(state.categories));
 
+
+
     useEffect(() => {
         updateState(data, 'tables', tablesCached, tablesApi);
     }, [data, tablesCached]);
@@ -195,7 +199,7 @@ export default function Dashboard() {
             insertTable({variables : { tableName, barId }})
                 .then(({data: {insert_tables_one: {table_id}}}) => tablesApi.setState(d => ({ tables: [ ...d.tables, { table_id, table_name: tableName } ] })))
                 .then(() => document.getElementById('tableNameInput').value = '')
-                .catch(err => console.log(err));
+                .catch(() => toast.error(<div><p className="font-extrabold text-md">Création impossible</p><p className="text-sm">Une table ayant le même nom existe déjà</p></div>));
         }
     };
 
@@ -216,7 +220,7 @@ export default function Dashboard() {
                     document.getElementById(`${categoryId}AvailabilityTimeStart`).value = '';
                     document.getElementById(`${categoryId}AvailabilityTimeEnd`).value = '';
                 })
-                .catch(err => console.log(err));
+                .catch(() => toast.error(<div><p className="font-extrabold text-md">Création impossible</p><p className="text-sm">Un élément ayant le même nom existe déjà</p></div>));
         }
     };
 
@@ -227,7 +231,7 @@ export default function Dashboard() {
             insertCategory({variables : { categoryName, barId }})
                 .then(({data: {insert_categories_one: {category_id}}}) => categoriesApi.setState(d => ({ categories: [ ...d.categories, { category_id, category_name: categoryName } ] })))
                 .then(() => document.getElementById('categoryNameInput').value = '')
-                .catch(err => console.log(err));
+                .catch(() => toast.error(<div><p className="font-extrabold text-md">Création impossible</p><p className="text-sm">Une catégorie ayant le même nom existe déjà</p></div>));
         }
     };
 
@@ -435,5 +439,16 @@ export default function Dashboard() {
                         </div>
                     </form>
                 </div>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
             </>;
 }

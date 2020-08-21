@@ -5,6 +5,8 @@ import {WebSocketLink} from "@apollo/client/link/ws";
 import {getMainDefinition} from "@apollo/client/utilities";
 import Bar from "./Bar";
 import BarContext from "./BarContext";
+import LinearProgress from "@bit/mui-org.material-ui.linear-progress";
+import './LinearProgress.css';
 
 function ApolloProvide({barId, token}) {
 
@@ -58,7 +60,7 @@ function App() {
 
     return initialized ?
         <ApolloProvide barId={keycloak.tokenParsed.sub} token={keycloak.token}/>
-        : <span>loading</span>;
+        : <LinearProgress className="linearProgress" />;
 }
 
 export default App;

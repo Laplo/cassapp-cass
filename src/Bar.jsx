@@ -1,5 +1,8 @@
 import React, {useEffect, useState, lazy, Suspense} from "react";
 import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-router-dom";
+import LinearProgress from "@bit/mui-org.material-ui.linear-progress/dist/LinearProgress";
+
+import './LinearProgress.css';
 
 const Dashboard = lazy(() => import("./Dashboard"));
 const Homepage = lazy(() => import("./Homepage"));
@@ -7,7 +10,7 @@ const PrintQR = lazy(() => import("./PrintQR"));
 
 export default function Bar() {
 
-    const renderLoader = () => <p>Chargement des données...</p>;
+    const renderLoader = () => <LinearProgress classes={{label: "linearProgress"}} />;
 
     return (
         <Router>

@@ -15,6 +15,7 @@ import BarContext from "./BarContext";
 
 import './Dashboard.css';
 import {Redirect} from "react-router-dom";
+import LinearProgress from "@bit/mui-org.material-ui.linear-progress/dist/LinearProgress";
 
 const QUERY_CATEGORIES = gql`
     query MyQuery($barId: uuid!) {
@@ -407,7 +408,7 @@ export default function Dashboard() {
             </div>
         ))
     : (
-        loadingCategories ? <span>Loading</span> : <span>error</span>
+        loadingCategories ? <LinearProgress /> : <span>error</span>
     );
 
     return loading ?

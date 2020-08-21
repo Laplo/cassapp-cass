@@ -9,6 +9,10 @@ import {
 } from '@apollo/client';
 import BarContext from "./BarContext";
 
+import './Dashboard.css';
+
+import QRCode  from 'qrcode.react';
+
 const QUERY_CATEGORIES = gql`
     query MyQuery($barId: uuid!) {
       categories(where: {bar_id: {_eq: $barId}, category_deleted_at: {_is_null: true}}, order_by: {category_name: asc}) {
@@ -155,6 +159,19 @@ export default function Dashboard() {
             });
     };
 
+    const handleOnClickDownloadQRCode = (tableId, tableName) => {
+        const canvas = document.getElementById(tableId);
+        const pngUrl = canvas
+            .toDataURL("image/png")
+            .replace("image/png", "image/octet-stream");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = `Cassbar_QRCODE_${tableName}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    };
+
     const handleOnClickItemCross = itemId => {
         deleteItems({variables : { itemId }})
             .then(() => {
@@ -178,6 +195,7 @@ export default function Dashboard() {
             insertTable({variables : { tableName, barId }})
                 .then(({data: {insert_tables_one: {table_id}}}) => tablesApi.setState(d => ({ tables: [ ...d.tables, { table_id, table_name: tableName } ] })))
                 .then(() => document.getElementById('tableNameInput').value = '')
+                .catch(err => console.log(err));
         }
     };
 
@@ -197,7 +215,8 @@ export default function Dashboard() {
                     document.getElementById(`${categoryId}PriceInput`).value = '';
                     document.getElementById(`${categoryId}AvailabilityTimeStart`).value = '';
                     document.getElementById(`${categoryId}AvailabilityTimeEnd`).value = '';
-                });
+                })
+                .catch(err => console.log(err));
         }
     };
 
@@ -208,6 +227,7 @@ export default function Dashboard() {
             insertCategory({variables : { categoryName, barId }})
                 .then(({data: {insert_categories_one: {category_id}}}) => categoriesApi.setState(d => ({ categories: [ ...d.categories, { category_id, category_name: categoryName } ] })))
                 .then(() => document.getElementById('categoryNameInput').value = '')
+                .catch(err => console.log(err));
         }
     };
 
@@ -224,10 +244,11 @@ export default function Dashboard() {
                         text-sm
                         font-semibold
                         text-gray-700
-                        w-1/4
+                        w-1/3
                         mr-2
                         ml-2
                         mt-3
+                        mb-5
                         hover:bg-gray-900
                         transform
                         hover:translate-y-1
@@ -243,9 +264,28 @@ export default function Dashboard() {
                 <span>
                     {tableName}
                 </span>
-                <span className="float-right cursor-pointer" onClick={() => handleOnClickTableCross(tableId)}>
-                    X
-                </span>
+                <div className="float-right cursor-pointer deleteIcon" onClick={() => handleOnClickTableCross(tableId)}>
+                    <span className="deleteIconTooltip">Supprimer</span>
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="trash w-6 h-6">
+                        <path
+                            fillRule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clipRule="evenodd"/>
+                    </svg>
+                </div>
+                <div className="float-right cursor-pointer deleteIcon" onClick={() => handleOnClickDownloadQRCode(tableId, tableName)}>
+                    <span className="deleteIconTooltip">Télécharger le QRCode</span>
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="document-download w-6 h-6">
+                        <path fillRule="evenodd"
+                              d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z"
+                              clipRule="evenodd"/>
+                    </svg>
+                    <QRCode
+                        id={tableId}
+                        value={tableId}
+                        hidden
+                    />
+                </div>
             </div>
         ))
         : null;
@@ -380,7 +420,7 @@ export default function Dashboard() {
                     </div>
                 </div>
                 {displayCategories}
-                <div className="border-2 ml-auto mr-auto" style={{width: '95%'}}/>
+                <div className="border-2 ml-auto mr-auto mt-5" style={{width: '95%'}}/>
                 <div className="flex justify-center mt-10 mb-10">
                     <form className="w-1/2" id="formCategory" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormCategory();}}>
                         <div className="flex items-center border-b border-gray-700 py-2">

@@ -91,7 +91,6 @@ export default function Homepage() {
     const [audio] = useState(new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'));
 
     useEffect(() => {
-        audio.muted = true;
         subscribeToMoreOrders({
             document: SUBSCRIBE_NEW_ORDERS,
             variables: {
@@ -99,14 +98,13 @@ export default function Homepage() {
             },
             updateQuery: (prev, {subscriptionData}) => {
                 if (!subscriptionData.data.orders.length) return prev;
-                const newOrder = subscriptionData.data.orders;
+                const newOrders = subscriptionData.data.orders;
                 return Object.assign({}, prev, {
-                    orders: [newOrder, ...prev.orders]
+                    orders: [...newOrders.filter(({order_id: oid1}) => !prev.orders.some(({order_id: oid2}) => oid1 === oid2)), ...prev.orders]
                 });
             }
         });
-        // eslint-disable-next-line
-    }, []);
+    }, [audio, barId, subscribeToMoreOrders]);
 
     useEffect(() => {
         setLoading(loadingOrders);

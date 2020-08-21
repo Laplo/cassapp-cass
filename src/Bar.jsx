@@ -1,11 +1,13 @@
-import Homepage from "./Homepage";
-import React, {useEffect, useState} from "react";
-import Dashboard from "./Dashboard";
-
-
+import React, {useEffect, useState, lazy, Suspense} from "react";
 import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-router-dom";
 
+const Dashboard = lazy(() => import("./Dashboard"));
+const Homepage = lazy(() => import("./Homepage"));
+
 export default function Bar() {
+
+    const renderLoader = () => <p>Chargement des données...</p>;
+
     return (
         <Router>
             <div>
@@ -18,12 +20,14 @@ export default function Bar() {
                 </nav>
             </div>
             <Switch>
-                <Route path="/dashboard">
-                    <Dashboard />
-                </Route>
-                <Route path="/">
-                    <Homepage />
-                </Route>
+                <Suspense fallback={renderLoader()}>
+                    <Route path="/dashboard">
+                        <Dashboard />
+                    </Route>
+                    <Route path="/">
+                        <Homepage />
+                    </Route>
+                </Suspense>
             </Switch>
         </Router>
     );

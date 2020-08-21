@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Link, Route, Switch, useLocation} from "react-r
 
 const Dashboard = lazy(() => import("./Dashboard"));
 const Homepage = lazy(() => import("./Homepage"));
+const PrintQR = lazy(() => import("./PrintQR"));
 
 export default function Bar() {
 
@@ -21,10 +22,13 @@ export default function Bar() {
             </div>
             <Switch>
                 <Suspense fallback={renderLoader()}>
-                    <Route path="/dashboard">
+                    <Route exact path="/dashboard">
                         <Dashboard />
                     </Route>
-                    <Route path="/">
+                    <Route exact path="/:tableId">
+                        <PrintQR />
+                    </Route>
+                    <Route exact path="/">
                         <Homepage />
                     </Route>
                 </Suspense>
@@ -37,14 +41,14 @@ export default function Bar() {
 function DynamicLink() {
     const location = useLocation();
     const [ link, setLink ] = useState({
-        pathname: (location.pathname === '/' ? '/dashboard' : '/') ,
-        name: location.pathname === '/' ? 'Panneau d\'administration' : 'Commandes'
+        pathname: (location.pathname === '/dashboard' ? '/' : '/dashboard') ,
+        name: location.pathname === '/dashboard' ? 'Commandes' : 'Panneau d\'administration'
     });
 
     useEffect(() => {
         setLink(l => ({
-            pathname: (location.pathname === '/' ? '/dashboard' : '/'),
-            name: location.pathname === '/' ? 'Panneau d\'administration' : 'Commandes'
+            pathname: (location.pathname === '/dashboard' ? '/' : '/dashboard') ,
+            name: location.pathname === '/dashboard' ? 'Commandes' : 'Panneau d\'administration'
         }));
     }, [location]);
 

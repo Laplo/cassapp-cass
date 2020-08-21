@@ -45,6 +45,8 @@ const QUERY_TABLES_AND_ITEMS = gql`
         item_price
         item_id
         category_id
+        item_availability_time_start
+        item_availability_time_end
       }
     }
 `;
@@ -74,8 +76,14 @@ const DELETE_ITEMS = gql`
 `;
 
 const INSERT_ITEMS = gql`
-    mutation MyMutation2($itemName: name!, $itemPrice: Int!, $categoryId: uuid!) {
-      insert_items_one(object: {item_name: $itemName, item_price: $itemPrice, category_id: $categoryId}) {
+    mutation MyMutation2($itemName: name!, $itemPrice: Int!, $categoryId: uuid!, $itemAvailabilityTimeStart: timetz, $itemAvailabilityTimeEnd: timetz) {
+      insert_items_one(object: {
+        item_name: $itemName,
+        item_price: $itemPrice,
+        category_id: $categoryId,
+        item_availability_time_start: $itemAvailabilityTimeStart,
+        item_availability_time_end: $itemAvailabilityTimeEnd
+      }) {
         item_id
       }
     }
@@ -176,15 +184,19 @@ export default function Dashboard() {
     const handleSubmitFormItem = categoryId => {
         const itemName = document.getElementById(`${categoryId}NameInput`).value;
         const itemPrice = document.getElementById(`${categoryId}PriceInput`).value * 100;
+        const itemAvailabilityTimeStart = document.getElementById(`${categoryId}AvailabilityTimeStart`).value || null;
+        const itemAvailabilityTimeEnd = document.getElementById(`${categoryId}AvailabilityTimeEnd`).value || null;
 
         if (itemName && itemPrice) {
-            insertItem({variables : { categoryId, itemName, itemPrice }})
+            insertItem({variables : { categoryId, itemName, itemPrice, itemAvailabilityTimeStart, itemAvailabilityTimeEnd }})
                 .then(({data: {insert_items_one: {item_id}}}) => {
-                    itemsApi.setState(d => ({ items : [ ...d.items, { item_id, item_name: itemName, item_price: itemPrice, category_id: categoryId } ] }));
+                    itemsApi.setState(d => ({ items : [ ...d.items, { item_id, item_name: itemName, item_price: itemPrice, category_id: categoryId, item_availability_time_start: itemAvailabilityTimeStart, item_availability_time_end: itemAvailabilityTimeEnd } ] }));
                 })
                 .then(() => {
                     document.getElementById(`${categoryId}NameInput`).value = '';
                     document.getElementById(`${categoryId}PriceInput`).value = '';
+                    document.getElementById(`${categoryId}AvailabilityTimeStart`).value = '';
+                    document.getElementById(`${categoryId}AvailabilityTimeEnd`).value = '';
                 });
         }
     };
@@ -239,7 +251,7 @@ export default function Dashboard() {
         : null;
 
     const displayItems = categoryId => dataItems ?
-        dataItems.filter(({category_id}) => (category_id === categoryId)).map(({ item_name: itemName, item_id: itemId, item_price: itemPrice }) => (
+        dataItems.filter(({category_id}) => (category_id === categoryId)).map(({ item_name: itemName, item_id: itemId, item_price: itemPrice, item_availability_time_start: itemAvailabilityTimeStart, item_availability_time_end: itemAvailabilityTimeEnd  }) => (
             <div
                 key={itemId}
                 className="
@@ -251,7 +263,6 @@ export default function Dashboard() {
                         text-sm
                         font-semibold
                         text-gray-700
-                        w-1/4
                         mr-2
                         ml-2
                         mt-3
@@ -268,9 +279,11 @@ export default function Dashboard() {
                     "
             >
                 <span>
-                    {itemName} - {itemPrice / 100}€
+                    {itemName}
+                    {itemAvailabilityTimeStart && itemAvailabilityTimeEnd? ' (de ' + itemAvailabilityTimeStart.substr(0, 5) + ' à ' + itemAvailabilityTimeEnd.substr(0, 5) + ')' : ''}
+                    &nbsp;- {itemPrice / 100}€
                 </span>
-                <span className="float-right cursor-pointer" onClick={() => handleOnClickItemCross(itemId)}>
+                <span className="ml-4 cursor-pointer" onClick={() => handleOnClickItemCross(itemId)}>
                     X
                 </span>
             </div>
@@ -280,7 +293,7 @@ export default function Dashboard() {
     const displayCategories = dataCategories ?
         dataCategories.map(({category_id: categoryId, category_name: categoryName}) => (
             <div key={categoryId}>
-                <div className="border-2 ml-auto mr-auto" style={{width: '95%'}}/>
+                <div className="border-2 ml-auto mr-auto mt-5" style={{width: '95%'}}/>
                 <div className="flex justify-center">
                     <div className="flex justify-center mt-5 mb-5 py-1 border-b-2 border-gray-600 w-56">
                         {categoryName}
@@ -289,8 +302,8 @@ export default function Dashboard() {
                         <div className="cursor-pointer transform hover:translate-y-1 duration-100 hover:scale-150" onClick={() => handleOnClickCategoryCross(categoryId)}>X</div>
                     </div>
                 </div>
-                <div className="flex justify-center mt-10 mb-10">
-                    <form id={`${categoryId}FormId`} className="w-1/5 mr-56" onSubmit={e => {e.preventDefault(); e.stopPropagation();handleSubmitFormItem(categoryId);}}>
+                <div className="flex justify-center mt-2 mb-2">
+                    <form id={`${categoryId}FormId`} onSubmit={e => {e.preventDefault(); e.stopPropagation();handleSubmitFormItem(categoryId);}}>
                         <div className="flex items-center border-b border-gray-700 py-2">
                             <input
                                 className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
@@ -298,6 +311,12 @@ export default function Dashboard() {
                             <input
                                 className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
                                 type="number" placeholder={`Prix ${categoryName}`} aria-label="item price" id={`${categoryId}PriceInput`} required/>
+                            <input
+                                className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
+                                type="time" placeholder="Heure de début (hh:ii)" aria-label="item availability time start" id={`${categoryId}AvailabilityTimeStart`}/>
+                            <input
+                                className="appearance-none bg-transparent border-none w-full text-gray-900 mr-1 py-1 px-1 leading-tight focus:outline-none"
+                                type="time" placeholder="Heure de fin (hh:ii)" aria-label="item availability time end" id={`${categoryId}AvailabilityTimeEnd`}/>
                             <button
                                 className="flex-shrink-0 bg-gray-700 hover:bg-gray-900 border-gray-700 hover:border-gray-900 text-sm border-4 text-white py-1 px-2 rounded"
                                 type="submit">
@@ -305,7 +324,9 @@ export default function Dashboard() {
                             </button>
                         </div>
                     </form>
-                    <div className="w-1/2">
+                </div>
+                <div className="flex justify-center">
+                    <div style={{width: '80%'}}>
                         {displayItems(categoryId)}
                     </div>
                 </div>
@@ -341,7 +362,7 @@ export default function Dashboard() {
                         Tables
                     </div>
                 </div>
-                <div className="flex justify-center mt-10 mb-10">
+                <div className="flex justify-center mt-10">
                     <form id="formTable" className="w-1/5 mr-56" onSubmit={e => {e.preventDefault(); e.stopPropagation(); handleSubmitFormTable();}}>
                         <div className="flex items-center border-b border-gray-700 py-2">
                             <input

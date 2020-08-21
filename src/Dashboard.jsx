@@ -155,12 +155,13 @@ export default function Dashboard() {
         updateState(datasCategories, 'categories', categoriesCached, categoriesApi);
     }, [datasCategories, categoriesCached]);
 
-    const handleOnClickTableCross = tableId => {
+    const handleOnClickTableCross = (tableId, tableName) => {
         deleteTables({variables : { tableId }})
             .then(() => {
                 const tables = dataTables.filter(({table_id}) => table_id !== tableId);
                 tablesApi.setState({tables});
-            });
+            })
+            .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">{tableName} supprimée avec succès</p></div>))
     };
 
     const handleOnClickDownloadQRCode = (tableId, tableName) => {
@@ -176,20 +177,22 @@ export default function Dashboard() {
         document.body.removeChild(downloadLink);
     };
 
-    const handleOnClickItemCross = itemId => {
+    const handleOnClickItemCross = (itemId, itemName) => {
         deleteItems({variables : { itemId }})
             .then(() => {
                 const items = dataItems.filter(({item_id}) => item_id !== itemId);
                 itemsApi.setState({items});
-            });
+            })
+            .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">"{itemName}" supprimé avec succès</p></div>))
     };
 
-    const handleOnClickCategoryCross = categoryId => {
+    const handleOnClickCategoryCross = (categoryId, categoryName) => {
         deleteCategories({variables : { categoryId }})
             .then(() => {
                 const categories = dataCategories.filter(({category_id}) => category_id !== categoryId);
                 categoriesApi.setState({categories});
-            });
+            })
+            .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">"{categoryName}" supprimée avec succès</p></div>))
     };
 
     const handleSubmitFormTable = () => {
@@ -199,6 +202,7 @@ export default function Dashboard() {
             insertTable({variables : { tableName, barId }})
                 .then(({data: {insert_tables_one: {table_id}}}) => tablesApi.setState(d => ({ tables: [ ...d.tables, { table_id, table_name: tableName } ] })))
                 .then(() => document.getElementById('tableNameInput').value = '')
+                .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">{tableName} créée avec succès</p></div>))
                 .catch(() => toast.error(<div><p className="font-extrabold text-md">Création impossible</p><p className="text-sm">Une table ayant le même nom existe déjà</p></div>));
         }
     };
@@ -220,6 +224,7 @@ export default function Dashboard() {
                     document.getElementById(`${categoryId}AvailabilityTimeStart`).value = '';
                     document.getElementById(`${categoryId}AvailabilityTimeEnd`).value = '';
                 })
+                .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">{itemName} créé avec succès</p></div>))
                 .catch(() => toast.error(<div><p className="font-extrabold text-md">Création impossible</p><p className="text-sm">Un élément ayant le même nom existe déjà</p></div>));
         }
     };
@@ -231,6 +236,7 @@ export default function Dashboard() {
             insertCategory({variables : { categoryName, barId }})
                 .then(({data: {insert_categories_one: {category_id}}}) => categoriesApi.setState(d => ({ categories: [ ...d.categories, { category_id, category_name: categoryName } ] })))
                 .then(() => document.getElementById('categoryNameInput').value = '')
+                .then(() => toast.success(<div><p className="font-extrabold text-md">Succès</p><p className="text-sm">Catégorie créée avec succès</p></div>))
                 .catch(() => toast.error(<div><p className="font-extrabold text-md">Création impossible</p><p className="text-sm">Une catégorie ayant le même nom existe déjà</p></div>));
         }
     };
@@ -268,7 +274,7 @@ export default function Dashboard() {
                 <span>
                     {tableName}
                 </span>
-                <div className="float-right cursor-pointer deleteIcon" onClick={() => handleOnClickTableCross(tableId)}>
+                <div className="float-right cursor-pointer deleteIcon" onClick={() => handleOnClickTableCross(tableId, tableName)}>
                     <span className="deleteIconTooltip">Supprimer</span>
                     <svg viewBox="0 0 20 20" fill="currentColor" className="trash w-6 h-6">
                         <path
@@ -327,7 +333,7 @@ export default function Dashboard() {
                     {itemAvailabilityTimeStart && itemAvailabilityTimeEnd? ' (de ' + itemAvailabilityTimeStart.substr(0, 5) + ' à ' + itemAvailabilityTimeEnd.substr(0, 5) + ')' : ''}
                     &nbsp;- {itemPrice / 100}€
                 </span>
-                <span className="ml-4 cursor-pointer" onClick={() => handleOnClickItemCross(itemId)}>
+                <span className="ml-4 cursor-pointer" onClick={() => handleOnClickItemCross(itemId, itemName)}>
                     X
                 </span>
             </div>
@@ -343,7 +349,7 @@ export default function Dashboard() {
                         {categoryName}
                     </div>
                     <div className="mt-5 mb-5 py-1 border-b-2 border-gray-600">
-                        <div className="cursor-pointer transform hover:translate-y-1 duration-100 hover:scale-150" onClick={() => handleOnClickCategoryCross(categoryId)}>X</div>
+                        <div className="cursor-pointer transform hover:translate-y-1 duration-100 hover:scale-150" onClick={() => handleOnClickCategoryCross(categoryId, categoryName)}>X</div>
                     </div>
                 </div>
                 <div className="flex justify-center mt-2 mb-2">

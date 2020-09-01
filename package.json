@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "npm run watch:css && react-scripts start",
-    "build": "npm run build:css && react-scripts build",
+    "build": "npm config set @bit:registry && npm run build:css && react-scripts build",
     "build:serve": "npm run build:css && react-scripts build && serve -s build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

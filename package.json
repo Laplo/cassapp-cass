@@ -29,7 +29,7 @@
     "zustand": "2.2.4"
   },
   "scripts": {
-    "preinstall": "npm config set @bit:registry https://node.bit.dev",
+    "preinstall": "npm config set '@bit:registry' https://node.bit.dev",
     "start": "npm run watch:css && react-scripts start",
     "build": "npm run build:css && react-scripts build",
     "build:serve": "npm run build:css && react-scripts build && serve -s build",

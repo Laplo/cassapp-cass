@@ -10,7 +10,7 @@ const PrintQR = lazy(() => import("./PrintQR"));
 
 export default function Bar() {
 
-    const renderLoader = () => <LinearProgress classes={{label: "linearProgress"}} />;
+    const renderLoader = () => <LinearProgress />;
 
     return (
         <Router>

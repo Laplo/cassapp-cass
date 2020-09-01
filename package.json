@@ -29,8 +29,9 @@
     "zustand": "2.2.4"
   },
   "scripts": {
+    "preinstall": "npm config set @bit:registry",
     "start": "npm run watch:css && react-scripts start",
-    "build": "npm config set @bit:registry && npm run build:css && react-scripts build",
+    "build": "npm run build:css && react-scripts build",
     "build:serve": "npm run build:css && react-scripts build && serve -s build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

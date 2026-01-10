@@ -18,7 +18,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-router-dom": "5.2.0",
-    "react-scripts": "3.4.1",
+    "react-scripts": "5.0.1",
     "react-scroll-trigger": "0.6.6",
     "react-toastify": "^6.0.8",
     "react-web-notifications": "1.1.0",
